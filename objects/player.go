@@ -65,6 +65,7 @@ func (p *Player) Draw(screen *ebiten.Image) {
 
 func (p *Player) Update() {
 	mPosX, mPosY := ebiten.CursorPosition()
+	//fmt.Println(p.DstPost.Sub(Vec{float64(mPosX), float64(mPosY)}))
 	p.angle = float64(Vec{0, 0}.AngleToPoint(Vec{float64(mPosX) - p.DstPost.X, float64(mPosY) - p.DstPost.Y})) + PiBy2
 
 	p.InputeUpdate()

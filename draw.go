@@ -7,6 +7,6 @@ import (
 )
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, fmt.Sprint("Fps:", ebiten.ActualFPS()))
+	ebitenutil.DebugPrint(screen, fmt.Sprint("TPS:", ebiten.ActualTPS()))
 	g.system.Draw(screen)
 }
