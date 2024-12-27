@@ -7,35 +7,41 @@ import (
 )
 
 const ScaleMultiplier = 0.2
-const ScaleInverse = 1 / ScaleMultiplier
+
+//const ScaleInverse = 1 / ScaleMultiplier
 
 type Note struct {
-	image *ebiten.Image
-	Pos   gmath.Pos
-	color ebiten.ColorScale
-	Speed float64
-	Alive bool
+	image     *ebiten.Image
+	Pos       gmath.Pos
+	color     ebiten.ColorScale
+	Speed     float64
+	Alive     bool
+	Movement  Vec
+	tickToDie int
 }
 
 func NewNote(pos *Vec, speed float64) Note {
 	noteSize := asset.NoteImage.Bounds().Size()
-	return Note{
+	n := Note{
 		image: asset.NoteImage,
 		Pos:   gmath.Pos{pos, Vec{-float64(noteSize.X) / 2, -float64(noteSize.Y) / 2}},
-		color: ColorScales[2],
+		color: ColorScales[1],
 		Speed: speed,
 		Alive: true,
 	}
+	n.setMovement(CenterScreen)
+	return n
 }
 
-func (n *Note) Set(pos *Vec, speed float64, color ebiten.ColorScale) {
+func (n *Note) Set(newNote *Note) {
 	if n.image == nil {
 		n.image = asset.NoteImage
-		n.Pos.Offset = Vec{-float64(n.image.Bounds().Size().X) / 2, -float64(n.image.Bounds().Size().Y) / 2}
 	}
-	n.Pos.Base = pos
-	n.Speed = speed
-	n.color = color
+	n.Pos = newNote.Pos
+	n.Speed = newNote.Speed
+	n.color = newNote.color
+	n.Movement = newNote.Movement
+	n.tickToDie = newNote.tickToDie
 	n.Alive = true
 }
 
@@ -51,7 +57,7 @@ func (n *Note) Draw(screen *ebiten.Image) {
 	screen.DrawImage(n.image, op)
 }
 
-func (n *Note) UpdatePos(destination Vec) {
+/*func (n *Note) UpdatePos(destination Vec) {
 	v := *n.Pos.Base
 	direction := destination.Sub(v)
 	dist := direction.Len()
@@ -65,4 +71,22 @@ func (n *Note) UpdatePos(destination Vec) {
 	//fmt.Println(add.Len())
 	n.Pos.Base.X += add.X
 	n.Pos.Base.Y += add.Y
+}*/
+
+func (n *Note) Update() {
+	if n.tickToDie <= 0 {
+		n.Alive = false
+		return
+	}
+	n.tickToDie--
+	n.Pos.Base.X += n.Movement.X
+	n.Pos.Base.Y += n.Movement.Y
+}
+
+func (n *Note) setMovement(destination Vec) {
+	v := *n.Pos.Base
+	direction := destination.Sub(v)
+	dist := direction.Len()
+	n.Movement = direction.Divf(dist).Mulf(n.Speed)
+	n.tickToDie = int((v.DistanceTo(destination) - 75) / n.Speed)
 }

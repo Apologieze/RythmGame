@@ -23,11 +23,11 @@ func NewNoteList(audio *audio.Player) NoteList {
 	return NoteList{List: make([]Note, 50, 50), EndIndex: -1, AllNotes: make(map[int64][]Note), audio: audio}
 }
 
-func (nl *NoteList) Add(pos *Vec, speed float64, color int) {
+func (nl *NoteList) Add(note *Note) {
 	if !nl.List[0].Alive {
 		nl.nextNewIndex = 0
 	}
-	nl.List[nl.nextNewIndex].Set(pos, speed, ColorScales[color])
+	nl.List[nl.nextNewIndex].Set(note)
 	if nl.EndIndex < nl.nextNewIndex {
 		nl.EndIndex = nl.nextNewIndex
 	}
@@ -54,12 +54,12 @@ func (nl *NoteList) Draw(screen *ebiten.Image) {
 	}
 }
 
-func (nl *NoteList) Update(destination Vec) {
+func (nl *NoteList) Update() {
 	var tempEnd int = -1
 	for i := 0; i <= nl.EndIndex; i++ {
 		note := &nl.List[i]
 		if note.Alive {
-			note.UpdatePos(destination)
+			note.Update()
 			if !note.Alive {
 				playSound(nl.audio)
 			}
@@ -111,6 +111,6 @@ func RandomVec(rec Rectangle) *Vec {
 }
 
 func playSound(player *audio.Player) {
-	player.Rewind()
+	_ = player.Rewind()
 	player.Play()
 }

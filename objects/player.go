@@ -9,11 +9,12 @@ import (
 	"math"
 )
 
-const margin int = 200
 const PiBy2 float64 = math.Pi / 2
 
 type Pos = gmath.Pos
 type Vec = gmath.Vec
+
+var CenterScreen Vec
 
 type Player struct {
 	Circle, Reflector  *ebiten.Image
@@ -26,6 +27,7 @@ type Player struct {
 }
 
 func NewPlayer(config config.Config, input *eInput.Handler) Player {
+	CenterScreen = Vec{float64(config.WindowSizeX / 2), float64(config.WindowSizeY / 2)}
 	player := Player{
 		Circle:       asset.GetImage("cercle.png"),
 		Reflector:    asset.GetImage("reflector2.png"),

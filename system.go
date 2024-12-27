@@ -10,7 +10,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	eInput "github.com/quasilyte/ebitengine-input"
 	"log"
-	"time"
 )
 
 type System struct {
@@ -25,7 +24,7 @@ type System struct {
 	initialTick, tick           int64
 }
 
-var startTime time.Time
+//var startTime time.Time
 
 func NewSystem(config config.Config, input *eInput.Handler) System {
 	s := System{
@@ -34,20 +33,19 @@ func NewSystem(config config.Config, input *eInput.Handler) System {
 		player:       objects.NewPlayer(config, input),
 		input:        input,
 		rectangle:    objects.Rectangle{420, 0, 1080, 1080},
-		osuMap:       parser.Parse("asset/map/Porter Robinson - Goodbye To A World (Monstrata) [Terminus].osu"),
+		osuMap:       parser.Parse("asset/map/Aiobahn feat. KOTOKO - INTERNET YAMERO (FLeVI) [Carpihat's Easy].osu"),
 	}
 	//s.notes.Add(&objects.Vec{X: 100, Y: 100}, 1, 1)
 	/*s.notes.Add(&objects.Vec{X: 800, Y: 0}, 1, 2)
 	s.notes.Add(&objects.Vec{X: 400, Y: 1000}, 1, 1)*/
 
 	var err error
-	s.audioPlayer, err = musicPlayer.PlayMP3(s.audioContext, "asset/audioMap/Goodbye.mp3")
+	s.audioPlayer, err = musicPlayer.PlayMP3(s.audioContext, "asset/audioMap/yamero.ogg")
 	s.hitSoundPlayer, err = musicPlayer.GetWavHitsound(s.audioContext, "asset/normal-hitclap.wav")
 	s.notes = objects.NewNoteList(s.hitSoundPlayer)
 
 	s.notes.InitNoteList(s.osuMap, s.rectangle, s.player.DstPost)
 	s.initialTick = int64(float64(s.osuMap.General.AudioLeadIn)*objects.TickTime) + 200
-	startTime = time.Now()
 
 	if err != nil {
 		log.Fatal(err)
@@ -71,10 +69,7 @@ func (s *System) Update() {
 			s.audioPlayer.Play()
 		}
 	}*/
-	if s.input.ActionIsJustPressed(config.ActionClickLeft) {
-		//s.notes.Add(objects.RandomVec(s.rectangle), 2, 2)
-	}
-	s.notes.Update(s.player.DstPost)
+	s.notes.Update()
 	s.player.Update()
 	if s.tick == s.initialTick {
 		s.audioPlayer.Play()
@@ -83,7 +78,7 @@ func (s *System) Update() {
 	if value != nil {
 		//fmt.Println(time.Now().Sub(startTime).Milliseconds(), float64(s.tick-s.initialTick)*objects.TickTime)
 		for _, note := range value {
-			s.notes.Add(note.Pos.Base, note.Speed, 1)
+			s.notes.Add(&note)
 		}
 		//s.tick = int64(float64(time.Now().Sub(startTime).Milliseconds()) / objects.TickTime)
 	}
