@@ -11,23 +11,25 @@ const ScaleMultiplier = 0.2
 //const ScaleInverse = 1 / ScaleMultiplier
 
 type Note struct {
-	image     *ebiten.Image
-	Pos       gmath.Pos
-	color     ebiten.ColorScale
-	Speed     float64
-	Alive     bool
-	Movement  Vec
-	tickToDie int
+	image        *ebiten.Image
+	Pos          gmath.Pos
+	color        ebiten.ColorScale
+	Speed        float64
+	Alive        bool
+	Movement     Vec
+	tickToDie    int
+	expectedTime int64
 }
 
-func NewNote(pos *Vec, speed float64) Note {
+func NewNote(pos *Vec, speed float64, time int64) Note {
 	noteSize := asset.NoteImage.Bounds().Size()
 	n := Note{
-		image: asset.NoteImage,
-		Pos:   gmath.Pos{pos, Vec{-float64(noteSize.X) / 2, -float64(noteSize.Y) / 2}},
-		color: ColorScales[1],
-		Speed: speed,
-		Alive: true,
+		image:        asset.NoteImage,
+		Pos:          gmath.Pos{pos, Vec{-float64(noteSize.X) / 2, -float64(noteSize.Y) / 2}},
+		color:        ColorScales[1],
+		Speed:        speed,
+		Alive:        true,
+		expectedTime: time,
 	}
 	n.setMovement(CenterScreen)
 	return n
@@ -43,6 +45,7 @@ func (n *Note) Set(newNote *Note) {
 	n.Movement = newNote.Movement
 	n.tickToDie = newNote.tickToDie
 	n.Alive = true
+	n.expectedTime = newNote.expectedTime
 }
 
 func (n *Note) Draw(screen *ebiten.Image) {

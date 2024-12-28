@@ -11,16 +11,18 @@ import (
 
 const TickTime float64 = 60. / 1000.
 
+var timeDiff int64
+
 type NoteList struct {
-	List                   []Note
-	nextNewIndex, EndIndex int
-	ElapsedTime            int64
-	AllNotes               map[int64][]Note
-	audio                  *audio.Player
+	List                        []Note
+	nextNewIndex, EndIndex      int
+	ElapsedTime                 int64
+	AllNotes                    map[int64][]Note
+	hitSoundPlayer, musicPlayer *audio.Player
 }
 
-func NewNoteList(audio *audio.Player) NoteList {
-	return NoteList{List: make([]Note, 50, 50), EndIndex: -1, AllNotes: make(map[int64][]Note), audio: audio}
+func NewNoteList(audio, music *audio.Player) NoteList {
+	return NoteList{List: make([]Note, 50, 50), EndIndex: -1, AllNotes: make(map[int64][]Note), hitSoundPlayer: audio, musicPlayer: music}
 }
 
 func (nl *NoteList) Add(note *Note) {
@@ -48,7 +50,7 @@ func (nl *NoteList) Add(note *Note) {
 }
 
 func (nl *NoteList) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, fmt.Sprint("\nEndIndex:", nl.EndIndex))
+	ebitenutil.DebugPrint(screen, fmt.Sprint("EndIndex:", nl.EndIndex, "\nTimeDiff:", timeDiff))
 	for i := 0; i <= nl.EndIndex; i++ {
 		nl.List[i].Draw(screen)
 	}
@@ -61,7 +63,8 @@ func (nl *NoteList) Update() {
 		if note.Alive {
 			note.Update()
 			if !note.Alive {
-				playSound(nl.audio)
+				timeDiff = nl.musicPlayer.Position().Milliseconds() - note.expectedTime
+				playSound(nl.hitSoundPlayer)
 			}
 			tempEnd = i
 		}
@@ -86,7 +89,7 @@ func (nl *NoteList) InitNoteList(file *osu_parser.OsuFile, rec Rectangle, center
 		var steps float64 = ((tempVec.DistanceTo(centerScreen) - 75) / speed)
 		var startTick int64 = int64((hitObj.Time*TickTime)-steps) + defaultOffset
 		fmt.Println(hitObj.Time * TickTime)
-		nl.AllNotes[startTick] = append(nl.AllNotes[startTick], NewNote(tempVec, speed))
+		nl.AllNotes[startTick] = append(nl.AllNotes[startTick], NewNote(tempVec, speed, int64(hitObj.Time)))
 	}
 }
 

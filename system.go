@@ -13,15 +13,15 @@ import (
 )
 
 type System struct {
-	line                        objects.Line
-	player                      objects.Player
-	notes                       objects.NoteList
-	audioContext                *audio.Context
-	audioPlayer, hitSoundPlayer *audio.Player
-	input                       *eInput.Handler
-	rectangle                   objects.Rectangle
-	osuMap                      *osu_parser.OsuFile
-	initialTick, tick           int64
+	line              objects.Line
+	player            objects.Player
+	notes             objects.NoteList
+	audioContext      *audio.Context
+	audioPlayer       *audio.Player
+	input             *eInput.Handler
+	rectangle         objects.Rectangle
+	osuMap            *osu_parser.OsuFile
+	initialTick, tick int64
 }
 
 //var startTime time.Time
@@ -41,8 +41,8 @@ func NewSystem(config config.Config, input *eInput.Handler) System {
 
 	var err error
 	s.audioPlayer, err = musicPlayer.PlayMP3(s.audioContext, "asset/audioMap/yamero.ogg")
-	s.hitSoundPlayer, err = musicPlayer.GetWavHitsound(s.audioContext, "asset/normal-hitclap.wav")
-	s.notes = objects.NewNoteList(s.hitSoundPlayer)
+	hitSoundPlayer, err := musicPlayer.GetWavHitsound(s.audioContext, "asset/normal-hitclap.wav")
+	s.notes = objects.NewNoteList(hitSoundPlayer, s.audioPlayer)
 
 	s.notes.InitNoteList(s.osuMap, s.rectangle, s.player.DstPost)
 	s.initialTick = int64(float64(s.osuMap.General.AudioLeadIn)*objects.TickTime) + 200
@@ -75,11 +75,10 @@ func (s *System) Update() {
 	if s.tick == s.initialTick {
 		s.audioPlayer.Play()
 	}
-	value := s.notes.AllNotes[s.tick]
-	if value != nil {
+	if s.notes.AllNotes[s.tick] != nil {
 		//fmt.Println(time.Now().Sub(startTime).Milliseconds(), float64(s.tick-s.initialTick)*objects.TickTime)
-		for _, note := range value {
-			s.notes.Add(&note)
+		for i := 0; i < len(s.notes.AllNotes[s.tick]); i++ {
+			s.notes.Add(&s.notes.AllNotes[s.tick][i])
 		}
 		//s.tick = int64(float64(time.Now().Sub(startTime).Milliseconds()) / objects.TickTime)
 	}
