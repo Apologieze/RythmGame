@@ -6,23 +6,29 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"math"
 	"math/rand/v2"
+	"sort"
 )
 
-const TickTime float64 = 60. / 1000.
+const TickPerMili float64 = 60. / 1000.
+const MilliPerTick = 1000.0 / 60.0
+
+//const DefaultOffset int = int(200. * MilliPerTick)
 
 var timeDiff int64
 
 type NoteList struct {
 	List                        []Note
 	nextNewIndex, EndIndex      int
-	ElapsedTime                 int64
-	AllNotes                    map[int64][]Note
+	AllNotes                    []Note
 	hitSoundPlayer, musicPlayer *audio.Player
+	Playing                     bool
+	currentTimeMili, noteIndex  int
 }
 
 func NewNoteList(audio, music *audio.Player) NoteList {
-	return NoteList{List: make([]Note, 50, 50), EndIndex: -1, AllNotes: make(map[int64][]Note), hitSoundPlayer: audio, musicPlayer: music}
+	return NoteList{List: make([]Note, 50, 50), EndIndex: -1, AllNotes: make([]Note, 0, 2000), hitSoundPlayer: audio, musicPlayer: music}
 }
 
 func (nl *NoteList) Add(note *Note) {
@@ -50,20 +56,25 @@ func (nl *NoteList) Add(note *Note) {
 }
 
 func (nl *NoteList) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, fmt.Sprint("EndIndex:", nl.EndIndex, "\nTimeDiff:", timeDiff))
+	ebitenutil.DebugPrint(screen, fmt.Sprint("EndIndex:", nl.EndIndex, "\nTime:", nl.currentTimeMili))
 	for i := 0; i <= nl.EndIndex; i++ {
 		nl.List[i].Draw(screen)
 	}
 }
 
 func (nl *NoteList) Update() {
+	if nl.Playing {
+		nl.CheckAdd(nl.currentTimeMili)
+	}
+
 	var tempEnd int = -1
 	for i := 0; i <= nl.EndIndex; i++ {
 		note := &nl.List[i]
 		if note.Alive {
 			note.Update()
 			if !note.Alive {
-				timeDiff = nl.musicPlayer.Position().Milliseconds() - note.expectedTime
+				//timeDiff = nl.musicPlayer.Position().Milliseconds() - note.expectedTime
+				fmt.Println(nl.currentTimeMili - note.compare)
 				playSound(nl.hitSoundPlayer)
 			}
 			tempEnd = i
@@ -72,13 +83,13 @@ func (nl *NoteList) Update() {
 	if tempEnd < nl.EndIndex {
 		nl.EndIndex = tempEnd
 	}
+	nl.currentTimeMili = int(nl.musicPlayer.Position().Milliseconds())
 }
 
 func (nl *NoteList) InitNoteList(file *osu_parser.OsuFile, rec Rectangle, centerScreen Vec) {
-	//var deltaUpdate float64 = 1. / 60.
 	list := file.HitObjects.List
 	lenghtHit := len(list)
-	var defaultOffset int64 = int64(float64(file.General.AudioLeadIn)*TickTime) + 200
+	//var defaultOffset = float64(file.General.AudioLeadIn+200) * TickPerMili
 	var speed float64 = 7
 	for i := 0; i < lenghtHit; i++ {
 		/*if list[i].Type&osu_parser.HitObjectTypeCircle == 0 {
@@ -86,10 +97,27 @@ func (nl *NoteList) InitNoteList(file *osu_parser.OsuFile, rec Rectangle, center
 		}*/
 		hitObj := list[i]
 		tempVec := RandomVec(rec)
-		var steps float64 = ((tempVec.DistanceTo(centerScreen) - 75) / speed)
-		var startTick int64 = int64((hitObj.Time*TickTime)-steps) + defaultOffset
-		fmt.Println(hitObj.Time * TickTime)
-		nl.AllNotes[startTick] = append(nl.AllNotes[startTick], NewNote(tempVec, speed, int64(hitObj.Time)))
+		var steps float64 = ((tempVec.DistanceTo(centerScreen) - 75.) / speed) * MilliPerTick
+		var startMili = int(math.Round(hitObj.Time - steps))
+		//var startTick int64 = int64(math.Round((hitObj.Time * TickPerMili) - steps + defaultOffset))
+		fmt.Println(startMili)
+		nl.AllNotes = append(nl.AllNotes, NewNote(tempVec, speed, startMili, int(hitObj.Time)))
+	}
+	sort.Slice(nl.AllNotes, func(i, j int) bool {
+		return nl.AllNotes[i].expectedTime < nl.AllNotes[j].expectedTime
+	})
+}
+
+func (nl *NoteList) CheckAdd(currentTime int) {
+	lenghtAll := len(nl.AllNotes)
+	for i := nl.noteIndex; i < lenghtAll; i++ {
+		if nl.AllNotes[i].expectedTime < nl.currentTimeMili {
+			nl.Add(&nl.AllNotes[i])
+			//fmt.Println(nl.AllNotes[i].expectedTime - nl.currentTimeMili)
+			nl.noteIndex = i + 1
+		} else {
+			break
+		}
 	}
 }
 

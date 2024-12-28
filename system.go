@@ -21,10 +21,10 @@ type System struct {
 	input             *eInput.Handler
 	rectangle         objects.Rectangle
 	osuMap            *osu_parser.OsuFile
-	initialTick, tick int64
+	initialTick, tick int
 }
 
-//var startTime time.Time
+// var startTime time.Time
 
 func NewSystem(config config.Config, input *eInput.Handler) System {
 	s := System{
@@ -45,7 +45,7 @@ func NewSystem(config config.Config, input *eInput.Handler) System {
 	s.notes = objects.NewNoteList(hitSoundPlayer, s.audioPlayer)
 
 	s.notes.InitNoteList(s.osuMap, s.rectangle, s.player.DstPost)
-	s.initialTick = int64(float64(s.osuMap.General.AudioLeadIn)*objects.TickTime) + 200
+	s.initialTick = 200
 	//startTime = time.Now()
 
 	if err != nil {
@@ -72,15 +72,22 @@ func (s *System) Update() {
 	}*/
 	s.notes.Update()
 	s.player.Update()
+
 	if s.tick == s.initialTick {
 		s.audioPlayer.Play()
+		s.notes.Playing = true
+		s.tick += 100
 	}
-	if s.notes.AllNotes[s.tick] != nil {
-		//fmt.Println(time.Now().Sub(startTime).Milliseconds(), float64(s.tick-s.initialTick)*objects.TickTime)
+
+	if s.tick < s.initialTick {
+		s.tick++
+		//s.notes.CheckAdd(int(float64(s.tick) * elapsedTime))
+	}
+	/*if s.notes.AllNotes[s.tick] != nil {
+		//fmt.Println(time.Now().Sub(startTime).Milliseconds(), float64(s.tick-s.initialTick)*objects.TickPerMili)
 		for i := 0; i < len(s.notes.AllNotes[s.tick]); i++ {
 			s.notes.Add(&s.notes.AllNotes[s.tick][i])
 		}
-		//s.tick = int64(float64(time.Now().Sub(startTime).Milliseconds()) / objects.TickTime)
-	}
-	s.tick++
+		//s.tick = int64(float64(time.Now().Sub(startTime).Milliseconds()) / objects.TickPerMili)
+	}*/
 }

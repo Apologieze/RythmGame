@@ -18,10 +18,11 @@ type Note struct {
 	Alive        bool
 	Movement     Vec
 	tickToDie    int
-	expectedTime int64
+	expectedTime int
+	compare      int
 }
 
-func NewNote(pos *Vec, speed float64, time int64) Note {
+func NewNote(pos *Vec, speed float64, time, compare int) Note {
 	noteSize := asset.NoteImage.Bounds().Size()
 	n := Note{
 		image:        asset.NoteImage,
@@ -30,6 +31,7 @@ func NewNote(pos *Vec, speed float64, time int64) Note {
 		Speed:        speed,
 		Alive:        true,
 		expectedTime: time,
+		compare:      compare,
 	}
 	n.setMovement(CenterScreen)
 	return n
@@ -46,6 +48,7 @@ func (n *Note) Set(newNote *Note) {
 	n.tickToDie = newNote.tickToDie
 	n.Alive = true
 	n.expectedTime = newNote.expectedTime
+	n.compare = newNote.compare
 }
 
 func (n *Note) Draw(screen *ebiten.Image) {
