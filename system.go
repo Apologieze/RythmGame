@@ -33,14 +33,14 @@ func NewSystem(config config.Config, input *eInput.Handler) System {
 		player:       objects.NewPlayer(config, input),
 		input:        input,
 		rectangle:    objects.Rectangle{420, 0, 1080, 1080},
-		osuMap:       parser.Parse("asset/map/Aiobahn feat. KOTOKO - INTERNET YAMERO (FLeVI) [Carpihat's Easy].osu"),
+		osuMap:       parser.Parse("asset/map/Porter Robinson - Goodbye To A World (Monstrata) [Terminus].osu"),
 	}
 	//s.notes.Add(&objects.Vec{X: 100, Y: 100}, 1, 1)
 	/*s.notes.Add(&objects.Vec{X: 800, Y: 0}, 1, 2)
 	s.notes.Add(&objects.Vec{X: 400, Y: 1000}, 1, 1)*/
 
 	var err error
-	s.audioPlayer, err = musicPlayer.PlayMP3(s.audioContext, "asset/audioMap/yamero.ogg")
+	s.audioPlayer, err = musicPlayer.PlayMP3(s.audioContext, "asset/audioMap/Goodbye.mp3")
 	hitSoundPlayer, err := musicPlayer.GetWavHitsound(s.audioContext, "asset/normal-hitclap.wav")
 	s.notes = objects.NewNoteList(hitSoundPlayer, s.audioPlayer)
 
@@ -81,7 +81,7 @@ func (s *System) Update() {
 
 	if s.tick < s.initialTick {
 		s.tick++
-		//s.notes.CheckAdd(int(float64(s.tick) * elapsedTime))
+		s.notes.CheckAdd(int(float64(s.tick) * objects.MilliPerTick))
 	}
 	/*if s.notes.AllNotes[s.tick] != nil {
 		//fmt.Println(time.Now().Sub(startTime).Milliseconds(), float64(s.tick-s.initialTick)*objects.TickPerMili)

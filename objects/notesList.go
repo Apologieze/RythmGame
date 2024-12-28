@@ -14,9 +14,9 @@ import (
 const TickPerMili float64 = 60. / 1000.
 const MilliPerTick = 1000.0 / 60.0
 
-//const DefaultOffset int = int(200. * MilliPerTick)
+var DefaultOffset int = int(math.Round(200.0 * MilliPerTick))
 
-var timeDiff int64
+var timeDiff int
 
 type NoteList struct {
 	List                        []Note
@@ -56,7 +56,7 @@ func (nl *NoteList) Add(note *Note) {
 }
 
 func (nl *NoteList) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, fmt.Sprint("EndIndex:", nl.EndIndex, "\nTime:", nl.currentTimeMili))
+	ebitenutil.DebugPrint(screen, fmt.Sprint("EndIndex:", nl.EndIndex, "\nTimeDiff:", timeDiff))
 	for i := 0; i <= nl.EndIndex; i++ {
 		nl.List[i].Draw(screen)
 	}
@@ -73,8 +73,7 @@ func (nl *NoteList) Update() {
 		if note.Alive {
 			note.Update()
 			if !note.Alive {
-				//timeDiff = nl.musicPlayer.Position().Milliseconds() - note.expectedTime
-				fmt.Println(nl.currentTimeMili - note.compare)
+				timeDiff = nl.currentTimeMili - note.compare
 				playSound(nl.hitSoundPlayer)
 			}
 			tempEnd = i
@@ -83,7 +82,7 @@ func (nl *NoteList) Update() {
 	if tempEnd < nl.EndIndex {
 		nl.EndIndex = tempEnd
 	}
-	nl.currentTimeMili = int(nl.musicPlayer.Position().Milliseconds())
+	nl.currentTimeMili = int(nl.musicPlayer.Position().Milliseconds()) + DefaultOffset
 }
 
 func (nl *NoteList) InitNoteList(file *osu_parser.OsuFile, rec Rectangle, centerScreen Vec) {
@@ -98,10 +97,10 @@ func (nl *NoteList) InitNoteList(file *osu_parser.OsuFile, rec Rectangle, center
 		hitObj := list[i]
 		tempVec := RandomVec(rec)
 		var steps float64 = ((tempVec.DistanceTo(centerScreen) - 75.) / speed) * MilliPerTick
-		var startMili = int(math.Round(hitObj.Time - steps))
+		var startMili = int(math.Round(hitObj.Time-steps)) + DefaultOffset
 		//var startTick int64 = int64(math.Round((hitObj.Time * TickPerMili) - steps + defaultOffset))
 		fmt.Println(startMili)
-		nl.AllNotes = append(nl.AllNotes, NewNote(tempVec, speed, startMili, int(hitObj.Time)))
+		nl.AllNotes = append(nl.AllNotes, NewNote(tempVec, speed, startMili, int(hitObj.Time)+DefaultOffset))
 	}
 	sort.Slice(nl.AllNotes, func(i, j int) bool {
 		return nl.AllNotes[i].expectedTime < nl.AllNotes[j].expectedTime
@@ -111,7 +110,8 @@ func (nl *NoteList) InitNoteList(file *osu_parser.OsuFile, rec Rectangle, center
 func (nl *NoteList) CheckAdd(currentTime int) {
 	lenghtAll := len(nl.AllNotes)
 	for i := nl.noteIndex; i < lenghtAll; i++ {
-		if nl.AllNotes[i].expectedTime < nl.currentTimeMili {
+		if nl.AllNotes[i].expectedTime < currentTime {
+			//fmt.Println("AZAFZDFA", currentTime, nl.AllNotes[i])
 			nl.Add(&nl.AllNotes[i])
 			//fmt.Println(nl.AllNotes[i].expectedTime - nl.currentTimeMili)
 			nl.noteIndex = i + 1
