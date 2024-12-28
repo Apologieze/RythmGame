@@ -22,12 +22,12 @@ type Note struct {
 	compare      int
 }
 
-func NewNote(pos *Vec, speed float64, time, compare int) Note {
+func NewNote(pos *Vec, speed float64, time, compare, color int) Note {
 	noteSize := asset.NoteImage.Bounds().Size()
 	n := Note{
 		image:        asset.NoteImage,
 		Pos:          gmath.Pos{pos, Vec{-float64(noteSize.X) / 2, -float64(noteSize.Y) / 2}},
-		color:        ColorScales[1],
+		color:        ColorScales[color],
 		Speed:        speed,
 		Alive:        true,
 		expectedTime: time,

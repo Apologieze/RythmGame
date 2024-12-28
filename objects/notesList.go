@@ -90,17 +90,23 @@ func (nl *NoteList) InitNoteList(file *osu_parser.OsuFile, rec Rectangle, center
 	lenghtHit := len(list)
 	//var defaultOffset = float64(file.General.AudioLeadIn+200) * TickPerMili
 	var speed float64 = 7
+	var color = 1
+	/*var rando = gmath.Rand{}
+	rando.SetSeed(1)*/
 	for i := 0; i < lenghtHit; i++ {
+		if list[i].NewCombo {
+			color = ((color + 1) % 3) + 1
+		}
 		/*if list[i].Type&osu_parser.HitObjectTypeCircle == 0 {
 			continue
 		}*/
 		hitObj := list[i]
-		tempVec := RandomVec(rec)
+		tempVec := objectToVect(hitObj)
 		var steps float64 = ((tempVec.DistanceTo(centerScreen) - 75.) / speed) * MilliPerTick
 		var startMili = int(math.Round(hitObj.Time-steps)) + DefaultOffset
 		//var startTick int64 = int64(math.Round((hitObj.Time * TickPerMili) - steps + defaultOffset))
-		fmt.Println(startMili)
-		nl.AllNotes = append(nl.AllNotes, NewNote(tempVec, speed, startMili, int(hitObj.Time)+DefaultOffset))
+		//fmt.Println(startMili)
+		nl.AllNotes = append(nl.AllNotes, NewNote(tempVec, speed, startMili, int(hitObj.Time)+DefaultOffset, color))
 	}
 	sort.Slice(nl.AllNotes, func(i, j int) bool {
 		return nl.AllNotes[i].expectedTime < nl.AllNotes[j].expectedTime
