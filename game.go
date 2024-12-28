@@ -14,7 +14,7 @@ func NewGame(currentConfig config.Config) *Game {
 	game := Game{}
 
 	keymap := config.InitKeymap()
-	game.inputSystem.Init(eInput.SystemConfig{DevicesEnabled: eInput.AnyDevice})
+	game.inputSystem.Init(eInput.SystemConfig{DevicesEnabled: eInput.KeyboardDevice})
 	game.system = NewSystem(currentConfig, game.inputSystem.NewHandler(0, keymap))
 
 	return &game

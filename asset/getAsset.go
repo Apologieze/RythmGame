@@ -17,5 +17,5 @@ func GetImage(fileName string) *ebiten.Image {
 }
 
 func Init() {
-	NoteImage = GetImage("note.png")
+	NoteImage = GetImage("note2.png")
 }

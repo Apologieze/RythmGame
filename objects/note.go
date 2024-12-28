@@ -50,9 +50,9 @@ func (n *Note) Draw(screen *ebiten.Image) {
 		return
 	}
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(n.Pos.Offset.X, n.Pos.Offset.X)
-	op.GeoM.Scale(ScaleMultiplier, ScaleMultiplier)
-	op.GeoM.Translate(n.Pos.Base.X, n.Pos.Base.Y)
+	//op.GeoM.Translate(n.Pos.Offset.X, n.Pos.Offset.X)
+	//op.GeoM.Scale(ScaleMultiplier, ScaleMultiplier)
+	op.GeoM.Translate(n.Pos.Base.X+n.Pos.Offset.X, n.Pos.Base.Y+n.Pos.Offset.Y)
 	op.ColorScale = n.color
 	screen.DrawImage(n.image, op)
 }

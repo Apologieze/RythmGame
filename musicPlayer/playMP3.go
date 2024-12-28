@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const SampleRate = 48000
+const SampleRate = 44100
 
 func PlayMP3(audioContext *audio.Context, filepath string) (*audio.Player, error) {
 	// Open the file

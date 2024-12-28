@@ -46,6 +46,7 @@ func NewSystem(config config.Config, input *eInput.Handler) System {
 
 	s.notes.InitNoteList(s.osuMap, s.rectangle, s.player.DstPost)
 	s.initialTick = int64(float64(s.osuMap.General.AudioLeadIn)*objects.TickTime) + 200
+	//startTime = time.Now()
 
 	if err != nil {
 		log.Fatal(err)
