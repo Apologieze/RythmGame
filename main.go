@@ -5,7 +5,12 @@ import (
 	"GameMusic/config"
 	"GameMusic/objects"
 	"github.com/hajimehoshi/ebiten/v2"
+	"image/color"
 	"log"
+)
+
+var (
+	BACKGROUND_COLOR = color.RGBA{R: 15, G: 15, B: 15, A: 255}
 )
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

@@ -9,7 +9,7 @@ import (
 var NoteImage *ebiten.Image
 
 func GetImage(fileName string) *ebiten.Image {
-	image, _, err := ebitenutil.NewImageFromFile("asset/" + fileName)
+	image, _, err := ebitenutil.NewImageFromFile("asset/images/" + fileName)
 	if err != nil {
 		log.Fatal("Problem while loading particle image: ", err)
 	}

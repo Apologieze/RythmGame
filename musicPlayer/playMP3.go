@@ -13,7 +13,7 @@ const SampleRate = 44100
 
 func PlayMP3(audioContext *audio.Context, filepath string) (*audio.Player, error) {
 	// Open the file
-	f, err := os.Open(filepath)
+	f, err := os.Open("asset/audioMap/" + filepath)
 	if err != nil {
 		return nil, err
 	}

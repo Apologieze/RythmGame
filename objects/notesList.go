@@ -96,6 +96,7 @@ func (nl *NoteList) InitNoteList(file *osu_parser.OsuFile, rec Rectangle, center
 	for i := 0; i < lenghtHit; i++ {
 		if list[i].NewCombo {
 			color = ((color + 1) % 3) + 1
+			//color = color%2 + 1
 		}
 		/*if list[i].Type&osu_parser.HitObjectTypeCircle == 0 {
 			continue

@@ -82,3 +82,12 @@ func (p *Player) InputeUpdate() {
 		p.reflectorMode |= 2
 	}
 }
+
+/*func (p *Player) InputeUpdate() {
+	if p.input.ActionIsJustPressed(config.ActionChangeColorBlue) {
+		p.reflectorMode = 1
+	}
+	if p.input.ActionIsJustPressed(config.ActionChangeColorRed) {
+		p.reflectorMode = 2
+	}
+}*/

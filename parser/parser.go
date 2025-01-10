@@ -7,7 +7,7 @@ import (
 
 func Parse(name string) *osu_parser.OsuFile {
 	fmt.Println("Initialisation of the map")
-	file, err := osu_parser.ParseFile(name)
+	file, err := osu_parser.ParseFile("asset/map/" + name)
 	if err != nil {
 		panic(err)
 	}
